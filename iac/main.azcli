@@ -1,0 +1,27 @@
+# az login --use-device-code
+# az account show
+# az account set --subscription "<enter subscription ID here>"
+
+BASENAME="dataeng"
+DEVELOPMENT=true
+ENVIRONMENT="Dev"
+LOCATION="westeurope"
+
+
+########################################################################################################################
+# Convert Bicep to JSON
+# Install Bicep: https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install
+# See also https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/bicep-decompile?tabs=azure-cli
+bicep build main.bicep --stdout
+
+########################################################################################################################
+# Deploy Bicep template on subscription-level
+az deployment sub create --name Deployment-$(date +"%Y-%m-%d") --template-file main.bicep --location $LOCATION --parameters baseName=$BASENAME development=$DEVELOPMENT environment=$ENVIRONMENT rgLocation=westeurope | jq .properties.outputs
+
+#az deployment sub create --name Deployment-$(Get-Date -UFormat "%Y-%m-%d_%H-%M-%S") -location westeurope --template-file main.bicep --parameters baseName=dataeng development=true environment=Dev rgLocation=westeurope | jq .properties.outputs
+# Discussion points:
+# - Bicep syntax (https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/file)
+
+########################################################################################################################
+# Delete resource group (DANGER! ⚡🛑)
+#az group delete --resource-group $RG --yes
